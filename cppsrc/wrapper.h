@@ -11,7 +11,7 @@
 class JxlToJpegAsyncWorker : public Napi::AsyncWorker
 {
     public:
-        JxlToJpegAsyncWorker(Napi::Buffer<uint8_t> &input, size_t input_size, Napi::Function &callback);
+        JxlToJpegAsyncWorker(Napi::Buffer<uint8_t> &input, size_t input_size, uint32_t quality, Napi::Function &callback);
         void Execute();
         void OnOK();
 
@@ -19,6 +19,7 @@ class JxlToJpegAsyncWorker : public Napi::AsyncWorker
       Napi::ObjectReference inputRef;
       uint8_t *inputPtr;
       uint8_t *outputPtr;
+      uint32_t quality;
       size_t inputSize;
       uint32_t outputSize;
 };

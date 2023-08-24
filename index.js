@@ -5,9 +5,9 @@ console.log('addon', testAddon);
 
 const fs = require('fs');
 
-const wrapper = (buffer) => {
+const wrapper = (buffer, quality) => {
   return new Promise((resolve, reject) => {
-    testAddon.jxlToJpeg({ buffer }, (error, data) => {
+    testAddon.jxlToJpeg({ buffer, quality }, (error, data) => {
       if (error) {
         reject(error);
       } else resolve(data);
@@ -38,7 +38,7 @@ const func = async () => {
       const buffer = fs.readFileSync(fileUrl);
       try {
         const start =  process.hrtime();
-        const image = await wrapper(buffer);
+        const image = await wrapper(buffer, 0.75);
         const end = process.hrtime();
         if (i == 1) await writeFile(`./test/output/${fileName.replace(".jxl", "")}.jpg`, image);
         time.push((end[0] * 1000000000 + end[1] - start[0] * 1000000000 - start[1]) / 1000000);

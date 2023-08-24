@@ -56,7 +56,8 @@ void MaybeMakeCicp(const jxl::extras::PackedPixelFile& ppf,
 
 bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
                          std::vector<uint8_t>* pixels, size_t* xsize, size_t* ysize, 
-                         std::vector<uint8_t>* icc_profile, jxl::extras::PackedPixelFile* ppf, uint8_t *&result, uint32_t &output_size) {
+                         std::vector<uint8_t>* icc_profile, jxl::extras::PackedPixelFile* ppf, 
+                         uint8_t *&result, uint32_t &output_size, uint32_t quality) {
   // Multi-threaded parallel runner.
   
   auto runner = JxlResizableParallelRunnerMake(nullptr);
@@ -170,8 +171,8 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
       std::unique_ptr<jxl::extras::Encoder> encoder = jxl::extras::Encoder::FromExtension(".jpg");
       jxl::extras::EncodedImage encoded_image;
       encoder->SetOption("jpeg_encoder", "libjpeg");
-      encoder->SetOption("jpeg_quality", "75");
-      encoder->SetOption("q", "75");
+      encoder->SetOption("jpeg_quality", std::to_string(quality));
+      encoder->SetOption("q", std::to_string(quality));
 
       JxlResizableParallelRunnerSetThreads(runner.get(), 8);
       if (!encoder->Encode(*ppf, &encoded_image, pool_.get())) {
@@ -191,7 +192,7 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
   }
 }
 
-uint8_t* jxlDecompress(const uint8_t* input, size_t input_size, uint32_t &output_size) {
+uint8_t* jxlDecompress(const uint8_t* input, size_t input_size, uint32_t &output_size, uint32_t quality) {
   std::vector<uint8_t> pixels;
   std::vector<uint8_t> icc_profile;
   size_t xsize = 0, ysize = 0;
@@ -199,7 +200,7 @@ uint8_t* jxlDecompress(const uint8_t* input, size_t input_size, uint32_t &output
   jxl::extras::PackedPixelFile ppf;
   uint8_t *result = nullptr;
   if (!decodeJpegXlOneShot(input, input_size, &pixels, &xsize, &ysize,
-                           &icc_profile, &ppf, result, output_size)) {
+                           &icc_profile, &ppf, result, output_size, quality)) {
     fprintf(stderr, "Error while decoding the jxl file\n");
     return nullptr;
   }
