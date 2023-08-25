@@ -5,13 +5,14 @@
   "main": "index.js",
   "gypfile": true,
   "scripts": {
-    "build": "node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers && node copy-files.js",
+    "build": "node-gyp rebuild --arch=x86_64 && node copy-files.js",
     "clean": "node-gyp clean"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
-    "node-addon-api": "^7.0.0"
+    "node-addon-api": "^7.0.0",
+    "node-gyp": "^9.4.0"
   }
 }

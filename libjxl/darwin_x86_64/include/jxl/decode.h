@@ -749,7 +749,7 @@ typedef enum {
  *     codestream.
  */
 JXL_EXPORT JxlDecoderStatus JxlDecoderGetColorAsEncodedProfile(
-    const JxlDecoder* dec, const JxlPixelFormat* unused_format,
+    const JxlDecoder* dec,
     JxlColorProfileTarget target, JxlColorEncoding* color_encoding);
 
 /**

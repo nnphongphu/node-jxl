@@ -20,14 +20,14 @@
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",
-            "libjxl/darwin_arm64/include",
-            "libjpeg/darwin_arm64/include"
+            "libjxl/darwin_x86_64/include",
+            "libjpeg/darwin_x86_64/include"
         ],
         'link_settings': {
-            'library_dirs': ['../libjxl/darwin_arm64/lib', '../libjpeg/darwin_arm64/lib'],
+            'library_dirs': ['../libjxl/darwin_x86_64/lib', '../libjpeg/darwin_x86_64/lib'],
             'libraries': [
-                'libjxl.0.9.dylib',
-                'libjxl_threads.0.9.dylib',
+                'libjxl.0.8.dylib',
+                'libjxl_threads.0.8.dylib',
                 'libjpeg.62.4.0.dylib',
             ]
         },
