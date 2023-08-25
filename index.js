@@ -1,5 +1,5 @@
 //index.js
-const testAddon = require('./build/Release/libjxl.node');
+const testAddon = require('./build/Release/jxl.node');
 
 console.log('addon', testAddon);
 

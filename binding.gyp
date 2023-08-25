@@ -8,7 +8,6 @@
         ],
         "sources": [
             "cppsrc/main.cc",
-            "cppsrc/no_png.cc",
             "cppsrc/wrapper.cc",
             "cppsrc/core.cc",
             "cppsrc/base/cache_aligned.cc",
@@ -21,29 +20,42 @@
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",
-            "./libjxl/x86Clang/include",
-            "./libjpeg/x86/include"
+            "libjxl/darwin_arm64/include",
+            "libjpeg/darwin_arm64/include"
         ],
         'link_settings': {
-            'library_dirs': ['./libjxl/x86Clang/lib', './libjpeg/x86/lib'],
+            'library_dirs': ['../libjxl/darwin_arm64/lib', '../libjpeg/darwin_arm64/lib'],
             'libraries': [
-                'brotlicommon.lib',
-                'brotlidec.lib',
-                'jxl_dec.lib',
-                'jxl_threads.lib',
-                'jpeg.lib',
-                'turbojpeg.lib'
+                'libjxl.0.9.dylib',
+                'libjxl_threads.0.9.dylib',
+                'libjpeg.62.4.0.dylib',
             ]
         },
         'dependencies': [
             "<!(node -p \"require('node-addon-api').gyp\")"
         ],
+        'xcode_settings': {
+            'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
+            'MACOSX_DEPLOYMENT_TARGET': '13.2',
+            'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+            'GCC_ENABLE_CPP_RTTI': 'YES',
+            'OTHER_CPLUSPLUSFLAGS': [
+                '-fexceptions',
+                '-Wall',
+                '-Oz'
+            ],
+            'OTHER_LDFLAGS': [
+                # Ensure runtime linking is relative to sharp.node
+                '-Wl,-rpath,\'@loader_path\''
+            ]
+        },
         'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ],
         'cflags_cc': [
             '-std=c++0x',
             '-fexceptions',
             '-Wall',
-            '-Os'
+            '-Os',
+            '-Wno-psabi'
         ],
     }]
 }
