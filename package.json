@@ -5,7 +5,7 @@
   "main": "index.js",
   "gypfile": true,
   "scripts": {
-    "build": "node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers && node copy-files.js",
+    "build": "node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node",
     "clean": "node-gyp clean"
   },
   "author": "",
