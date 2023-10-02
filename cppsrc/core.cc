@@ -105,6 +105,8 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
       }
 
       info = ppf->info;
+      ppf->info.bits_per_sample = ppf->info.bits_per_sample > 8? 8 : ppf->info.bits_per_sample;
+      ppf->info.exponent_bits_per_sample = 0;
       *xsize = info.xsize;
       *ysize = info.ysize;
 
