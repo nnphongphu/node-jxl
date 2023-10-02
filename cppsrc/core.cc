@@ -54,14 +54,14 @@ void MaybeMakeCicp(const jxl::extras::PackedPixelFile& ppf,
   cicp->at(3) = 1;                  // Video Full Range Flag
 }
 
+auto runner = JxlResizableParallelRunnerMake(nullptr);
+std::unique_ptr<jxl::ThreadPool> pool_ = jxl::make_unique<jxl::ThreadPool>(JxlResizableParallelRunner, runner.get());
+
 bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
                          std::vector<uint8_t>* pixels, size_t* xsize, size_t* ysize, 
                          std::vector<uint8_t>* icc_profile, jxl::extras::PackedPixelFile* ppf, 
                          uint8_t *&result, uint32_t &output_size, uint32_t quality) {
   // Multi-threaded parallel runner.
-  
-  auto runner = JxlResizableParallelRunnerMake(nullptr);
-  std::unique_ptr<jxl::ThreadPool> pool_ = jxl::make_unique<jxl::ThreadPool>(JxlResizableParallelRunner, runner.get());
 
   auto dec = JxlDecoderMake(nullptr);
   
@@ -98,6 +98,7 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
       fprintf(stderr, "Error, already provided all input\n");
       return false;
     } else if (status == JXL_DEC_BASIC_INFO) {
+
       if (JXL_DEC_SUCCESS != JxlDecoderGetBasicInfo(dec.get(), &ppf->info)) {
         fprintf(stderr, "JxlDecoderGetBasicInfo failed\n");
         return false;
@@ -118,6 +119,7 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
       //     JxlResizableParallelRunnerSuggestThreads(info.xsize, info.ysize));
     } else if (status == JXL_DEC_COLOR_ENCODING) {
       // Get the ICC color profile of the pixel data
+
       size_t icc_size;
       if (JXL_DEC_SUCCESS !=
           JxlDecoderGetICCProfileSize(dec.get(), JXL_COLOR_PROFILE_TARGET_DATA,
@@ -125,7 +127,6 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
         fprintf(stderr, "JxlDecoderGetICCProfileSize failed\n");
         return false;
       }
-
       ppf->icc.resize(icc_size);
       if (JXL_DEC_SUCCESS != JxlDecoderGetColorAsICCProfile(
                                  dec.get(), JXL_COLOR_PROFILE_TARGET_DATA, 
@@ -133,6 +134,7 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
         fprintf(stderr, "JxlDecoderGetColorAsICCProfile failed\n");
         return false;
       }
+
     } else if (status == JXL_DEC_NEED_IMAGE_OUT_BUFFER) {
       size_t buffer_size;
       if (JXL_DEC_SUCCESS !=
@@ -176,7 +178,6 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
       encoder->SetOption("jpeg_quality", std::to_string(quality));
       encoder->SetOption("q", std::to_string(quality));
 
-      JxlResizableParallelRunnerSetThreads(runner.get(), 8);
       if (!encoder->Encode(*ppf, &encoded_image, pool_.get())) {
         printf("Encoding failed\n");
         return false;
@@ -188,7 +189,6 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
 
       return true;
     } else {
-      fprintf(stderr, "Unknown decoder status\n");
       return false;
     }
   }
