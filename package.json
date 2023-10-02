@@ -8,7 +8,6 @@
     "build": "node-gyp rebuild && node copy-files.js",
     "ebuild32": "node-gyp rebuild --target=22.3.9 --arch=ia32 --dist-url=https://electronjs.org/headers",
     "ebuild64": "node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers",
-    "ebuilddarm64": "node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers",
     "clean": "node-gyp clean"
   },
   "author": "",

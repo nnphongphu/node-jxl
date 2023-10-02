@@ -8,5 +8,5 @@ const libs = [
 ]
 
 for (const lib of libs) {
-  fs.copyFileSync(`./libjxl/x86Clang/lib/${lib}`, `./build/Release/${lib}`);
+  fs.copyFileSync(`./libjxl/x64/lib/${lib}`, `./build/Release/${lib}`);
 }
