@@ -6,16 +6,18 @@
   "gypfile": true,
   "scripts": {
     "build": "node-gyp rebuild && node copy-files.js",
-    "ebuild:win32_ia32": "node-gyp rebuild --target=22.3.9 --arch=ia32 --dist-url=https://electronjs.org/headers",
-    "ebuild:win32_x64": "node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers",
-    "ebuild:darwin_arm64": "node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node",
-    "ebuild:darwin_x64": "node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node",
+    "ebuild:win32_ia32": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=ia32 --dist-url=https://electronjs.org/headers && node copy-files.js",
+    "ebuild:win32_x64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers && node copy-files.js",
+    "ebuild:darwin_arm64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node",
+    "ebuild:darwin_x64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node",
     "clean": "node-gyp clean"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
+    "decompress": "^4.2.1",
+    "decompress-targz": "^4.1.1",
     "node-addon-api": "^7.0.0"
   }
 }
