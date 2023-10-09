@@ -4,3 +4,6 @@ build
 .vscode
 ./libjxl
 ./libjpeg
+*.jxl
+*.jpeg
+*.jpg
