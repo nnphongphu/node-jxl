@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "no_png.h"
 #include "packed_image.h"
 #include "encode.h"
 #include "jxl/encode.h"
@@ -104,17 +103,16 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
       return false;
     } else if (status == JXL_DEC_BASIC_INFO) {
 
-      if (JXL_DEC_SUCCESS != JxlDecoderGetBasicInfo(dec.get(), &ppf->info)) {
+      if (JXL_DEC_SUCCESS != JxlDecoderGetBasicInfo(dec.get(), &info)) {
         fprintf(stderr, "JxlDecoderGetBasicInfo failed\n");
         return false;
       }
-
-      info = ppf->info;
-      ppf->info.bits_per_sample = ppf->info.bits_per_sample > 8? 8 : ppf->info.bits_per_sample;
-      ppf->info.exponent_bits_per_sample = 0;
+      info.bits_per_sample = info.bits_per_sample > 8? 8 : info.bits_per_sample;
+      info.exponent_bits_per_sample = 0;
+      ppf->info = info;
       *xsize = info.xsize;
       *ysize = info.ysize;
-
+      //info.bits_per_sample = info.bits_per_sample > 8? 8:info.bits_per_sample;
       JxlResizableParallelRunnerSetThreads(
           runner.get(),
           JxlResizableParallelRunnerSuggestThreads(info.xsize, info.ysize));
@@ -127,18 +125,20 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
 
       size_t icc_size;
       if (JXL_DEC_SUCCESS !=
-          JxlDecoderGetICCProfileSize(dec.get(), JXL_COLOR_PROFILE_TARGET_DATA,
+          JxlDecoderGetICCProfileSize(dec.get(), NULL, JXL_COLOR_PROFILE_TARGET_DATA,
                                       &icc_size)) {
         fprintf(stderr, "JxlDecoderGetICCProfileSize failed\n");
         return false;
       }
       ppf->icc.resize(icc_size);
+
       if (JXL_DEC_SUCCESS != JxlDecoderGetColorAsICCProfile(
-                                 dec.get(), JXL_COLOR_PROFILE_TARGET_DATA, 
-                                 ppf->icc.data(), icc_size)) {
+                                  dec.get(), NULL, JXL_COLOR_PROFILE_TARGET_DATA, 
+                                  ppf->icc.data(), icc_size)) {
         fprintf(stderr, "JxlDecoderGetColorAsICCProfile failed\n");
         return false;
       }
+    
 
     } else if (status == JXL_DEC_NEED_IMAGE_OUT_BUFFER) {
       size_t buffer_size;
@@ -165,6 +165,19 @@ bool decodeJpegXlOneShot(const uint8_t* jxl, size_t size,
     } else if (status == JXL_DEC_FULL_IMAGE) {
       // Nothing to do. Do not yet return. If the image is an animation, more
       // full frames may be decoded. This example only keeps the last one.
+       size_t icc_size;
+      if (JXL_DEC_SUCCESS !=
+          JxlDecoderGetICCProfileSize(dec.get(), NULL, JXL_COLOR_PROFILE_TARGET_DATA,
+                                      &icc_size)) {
+        fprintf(stderr, "JxlDecoderGetICCProfileSize failed\n");
+        return false;
+      }
+      if (JXL_DEC_SUCCESS != JxlDecoderGetColorAsICCProfile(
+                                  dec.get(), NULL, JXL_COLOR_PROFILE_TARGET_DATA, 
+                                  ppf->icc.data(), icc_size)) {
+        fprintf(stderr, "JxlDecoderGetColorAsICCProfile failed\n");
+        return false;
+      }
     } else if (status == JXL_DEC_SUCCESS) {
       // All decoding successfully finished.
       // It's not required to call JxlDecoderReleaseInput(dec.get()) here since

@@ -5,11 +5,11 @@
   "main": "index.js",
   "gypfile": true,
   "scripts": {
-    "build": "node-gyp rebuild && node copy-files.js",
+    "preinstall": "node ./decomp.js",
     "ebuild:win32_ia32": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=ia32 --dist-url=https://electronjs.org/headers && node copy-files.js",
     "ebuild:win32_x64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers && node copy-files.js",
-    "ebuild:darwin_arm64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node",
-    "ebuild:darwin_x64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node",
+    "ebuild:darwin_arm64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=arm64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node && install_name_tool -change /usr/local/opt/jpeg-xl/lib/libjxl.0.8.dylib @rpath/libjxl.0.8.dylib ./build/Release/jxl.node && install_name_tool -change /usr/local/opt/jpeg-xl/lib/libjxl_threads.0.8.dylib @rpath/libjxl_threads.0.8.dylib ./build/Release/jxl.node",
+    "ebuild:darwin_x64": "node decomp.js && node-gyp rebuild --target=22.3.9 --arch=x64 --dist-url=https://electronjs.org/headers && node copy-files.js && install_name_tool -change /opt/libjpeg-turbo/lib/libjpeg.62.4.0.dylib @rpath/libjpeg.62.4.0.dylib ./build/Release/jxl.node && install_name_tool -change /usr/local/opt/jpeg-xl/lib/libjxl.0.8.dylib @rpath/libjxl.0.8.dylib ./build/Release/jxl.node && install_name_tool -change /usr/local/opt/jpeg-xl/lib/libjxl_threads.0.8.dylib @rpath/libjxl_threads.0.8.dylib ./build/Release/jxl.node",
     "clean": "node-gyp clean"
   },
   "author": "",

@@ -3,7 +3,7 @@
         'platform_and_arch': '<!(node -p "require(\'./platform\')()")',
     },
     'targets': [{
-        'target_name': 'libjxl',
+        'target_name': 'jxl',
         'cflags!': [ '-fno-exceptions' ],
         'cflags_cc!': [ '-fno-exceptions' ],
         'defines': [
@@ -11,7 +11,6 @@
         ],
         'sources': [
             'cppsrc/main.cc',
-            'cppsrc/no_png.cc',
             'cppsrc/wrapper.cc',
             'cppsrc/core.cc',
             'cppsrc/base/cache_aligned.cc',
@@ -26,19 +25,49 @@
             "<!@(node -p \"require('node-addon-api').include\")",
             './libjxl/<(platform_and_arch)/include', './libjpeg/<(platform_and_arch)/include'
         ],
-        'link_settings': {
-            'library_dirs': ['./libjxl/<(platform_and_arch)/lib', './libjpeg/<(platform_and_arch)/lib'],
-            'libraries': [
-                'brotlicommon.lib',
-                'brotlidec.lib',
-                'brotlienc.lib',
-                'jxl.lib',
-                'jxl_dec.lib',
-                'jxl_threads.lib',
-                'jpeg.lib',
-                'turbojpeg.lib'
-            ]
-        },
+        'conditions': [
+            ['OS == "win"', {
+                'link_settings': {
+                    'library_dirs': ['./libjxl/<(platform_and_arch)/lib', './libjpeg/<(platform_and_arch)/lib'],
+                    'libraries': [
+                        'brotlicommon.lib',
+                        'brotlidec.lib',
+                        'brotlienc.lib',
+                        'jxl.lib',
+                        'jxl_dec.lib',
+                        'jxl_threads.lib',
+                        'jpeg.lib',
+                        'turbojpeg.lib'
+                    ]
+                },
+            }],
+            ['OS == "mac"', {
+                'link_settings': {
+                    'library_dirs': ['../libjxl/<(platform_and_arch)/lib', '../libjpeg/<(platform_and_arch)/lib'],
+                    'libraries': [
+                        'libjxl.0.8.dylib',
+                        'libjxl_threads.0.8.dylib',
+                        'libjpeg.62.4.0.dylib',
+                    ]
+                },
+                'xcode_settings': {
+                    'CLANG_CXX_LANGUAGE_STANDARD': 'c++11',
+                    'MACOSX_DEPLOYMENT_TARGET': '13.2',
+                    'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+                    'GCC_ENABLE_CPP_RTTI': 'YES',
+                    'OTHER_CPLUSPLUSFLAGS': [
+                        '-fexceptions',
+                        '-Wall',
+                        '-Oz'
+                    ],
+                    'OTHER_LDFLAGS': [
+                        # Ensure runtime linking is relative to sharp.node
+                        '-Wl,-rpath,\'@loader_path\'',
+                        '-Wl,-rpath,\'@loader_path\''
+                    ]
+                },
+            }],
+        ],
         'dependencies': [
             "<!(node -p \"require('node-addon-api').gyp\")"
         ],
