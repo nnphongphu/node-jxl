@@ -20,5 +20,6 @@
  */
 
 uint8_t* jxlDecompress(const uint8_t* input, size_t input_size, uint32_t &output_size, uint32_t quality);
+uint8_t* jxlCompress(const uint8_t* input, size_t input_size, size_t width, size_t height);
 
 #endif  // TOOLS_WASM_DEMO_JXL_DECOMPRESSOR_H_

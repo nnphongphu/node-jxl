@@ -5,6 +5,9 @@
 #include <jxl/decode_cxx.h>
 #include <jxl/resizable_parallel_runner.h>
 #include <jxl/resizable_parallel_runner_cxx.h>
+#include <jxl/parallel_runner.h>
+#include <jxl/thread_parallel_runner.h>
+#include <jxl/thread_parallel_runner_cxx.h>
 
 #include <cstring>
 #include <memory>
@@ -16,6 +19,8 @@
 #include "no_png.h"
 #include "packed_image.h"
 #include "encode.h"
+#include "jxl/encode.h"
+#include "jxl/encode_cxx.h"
 #include "base/data_parallel.h"
 
 void MaybeMakeCicp(const jxl::extras::PackedPixelFile& ppf,
@@ -208,4 +213,91 @@ uint8_t* jxlDecompress(const uint8_t* input, size_t input_size, uint32_t &output
   }
   
   return result;
+}
+
+
+bool EncodeJxlOneshot(const uint8_t *pixels, size_t pixel_size, const uint32_t xsize,
+                      const uint32_t ysize, std::vector<uint8_t>* compressed) {
+
+  auto enc = JxlEncoderMake(/*memory_manager=*/nullptr);
+  auto runner = JxlThreadParallelRunnerMake(
+      /*memory_manager=*/nullptr,
+      JxlThreadParallelRunnerDefaultNumWorkerThreads());
+  if (JXL_ENC_SUCCESS != JxlEncoderSetParallelRunner(enc.get(),
+                                                     JxlThreadParallelRunner,
+                                                     runner.get())) {
+    fprintf(stderr, "JxlEncoderSetParallelRunner failed\n");
+    return false;
+  }
+  
+
+  JxlPixelFormat pixel_format = {3, JXL_TYPE_UINT8, JXL_NATIVE_ENDIAN, 0};
+
+  JxlBasicInfo basic_info;
+  JxlEncoderInitBasicInfo(&basic_info);
+  basic_info.xsize = xsize;
+  basic_info.ysize = ysize;
+  if (JXL_ENC_SUCCESS != JxlEncoderSetBasicInfo(enc.get(), &basic_info)) {
+    fprintf(stderr, "JxlEncoderSetBasicInfo failed\n");
+    return false;
+  }
+
+  JxlColorEncoding color_encoding = {};
+  JxlColorEncodingSetToSRGB(&color_encoding,
+                            /*is_gray=*/pixel_format.num_channels < 3);
+  if (JXL_ENC_SUCCESS !=
+      JxlEncoderSetColorEncoding(enc.get(), &color_encoding)) {
+    fprintf(stderr, "JxlEncoderSetColorEncoding failed\n");
+    return false;
+  }
+  JxlEncoderFrameSettings* frame_settings =
+      JxlEncoderFrameSettingsCreate(enc.get(), nullptr);
+
+  JxlEncoderSetFrameLossless(frame_settings, JXL_FALSE);
+  JxlEncoderSetFrameDistance(frame_settings, 2.28);
+  JxlEncoderFrameSettingsSetOption(frame_settings, JXL_ENC_FRAME_SETTING_EFFORT, 1);
+  JxlEncoderFrameSettingsSetOption(frame_settings, JXL_ENC_FRAME_SETTING_DECODING_SPEED, 4);
+
+  if (JXL_ENC_SUCCESS !=
+      JxlEncoderAddImageFrame(frame_settings, &pixel_format,
+                              (void*)pixels,
+                              sizeof(uint8_t) * pixel_size)) {
+    fprintf(stderr, "JxlEncoderAddImageFrame failed\n");
+    return false;
+  }
+  JxlEncoderCloseInput(enc.get());
+
+  compressed->resize(64);
+  uint8_t* next_out = compressed->data();
+  size_t avail_out = compressed->size() - (next_out - compressed->data());
+  JxlEncoderStatus process_result = JXL_ENC_NEED_MORE_OUTPUT;
+  while (process_result == JXL_ENC_NEED_MORE_OUTPUT) {
+    process_result = JxlEncoderProcessOutput(enc.get(), &next_out, &avail_out);
+    if (process_result == JXL_ENC_NEED_MORE_OUTPUT) {
+      size_t offset = next_out - compressed->data();
+      compressed->resize(compressed->size() * 2);
+      next_out = compressed->data() + offset;
+      avail_out = compressed->size() - offset;
+    }
+  }
+  compressed->resize(next_out - compressed->data());
+  if (JXL_ENC_SUCCESS != process_result) {
+    fprintf(stderr, "JxlEncoderProcessOutput failed\n");
+    return false;
+  }
+
+  return true;
+}
+
+
+uint8_t* jxlCompress(const uint8_t* input, size_t input_size, size_t width, size_t height) {
+  std::vector<uint8_t> compressed;
+  if (!EncodeJxlOneshot(input, input_size, width, height, &compressed)) {
+    fprintf(stderr, "Error while encoding the jxl file\n");
+    return nullptr;
+  }
+
+  uint8_t *output = new uint8_t[compressed.size()];
+  memcpy(output, compressed.data(), compressed.size());
+  return output;
 }

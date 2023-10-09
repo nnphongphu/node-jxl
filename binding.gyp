@@ -31,6 +31,8 @@
             'libraries': [
                 'brotlicommon.lib',
                 'brotlidec.lib',
+                'brotlienc.lib',
+                'jxl.lib',
                 'jxl_dec.lib',
                 'jxl_threads.lib',
                 'jpeg.lib',
