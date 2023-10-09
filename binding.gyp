@@ -10,16 +10,16 @@
             'NAPI_VERSION=7'
         ],
         'sources': [
-            'cppsrc/main.cc',
-            'cppsrc/wrapper.cc',
-            'cppsrc/core.cc',
-            'cppsrc/base/cache_aligned.cc',
-            'cppsrc/base/data_parallel.cc',
-            'cppsrc/base/padded_bytes.cc',
-            'cppsrc/base/random.cc',
-            'cppsrc/encode.cc',
-            'cppsrc/exif.cc',
-            'cppsrc/jpg.cc'
+            'src/main.cc',
+            'src/wrapper.cc',
+            'src/core.cc',
+            'src/base/cache_aligned.cc',
+            'src/base/data_parallel.cc',
+            'src/base/padded_bytes.cc',
+            'src/base/random.cc',
+            'src/encode.cc',
+            'src/exif.cc',
+            'src/jpg.cc'
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",
